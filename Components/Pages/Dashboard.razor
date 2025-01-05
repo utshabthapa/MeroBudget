@@ -172,6 +172,8 @@
         clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
         remainingDebt = totalDebt - clearedDebt;
 
+        balance = cashInflow + remainingDebt - cashOutflow;
+
         pendingDebts = debts
            .Select(d => new Debt
                {
