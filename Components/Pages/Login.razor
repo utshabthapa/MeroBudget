@@ -1,0 +1,45 @@
+﻿@page "/login"
+@using MeroBudget.Models
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+
+<h3>Login</h3>
+
+<div>
+    <input @bind="LoginUsername" placeholder="Username" />
+    <input @bind="LoginPassword" placeholder="Password" type="password" />
+    <button @onclick="PerformLogin">Login</button>
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+        <p>@Message</p>
+}
+
+@code {
+    private string LoginUsername = "";
+    private string LoginPassword = "";
+    private string Message = "";
+
+    private List<User> Users = new();
+
+    protected override void OnInitialized()
+    {
+        Users = UserService.LoadUsers();
+    }
+
+    private void PerformLogin()
+    {
+        var user = Users.FirstOrDefault(u => u.Username == LoginUsername);
+
+        if (user != null && UserService.ValidatePassword(LoginPassword, user.Password))
+        {
+            UserService.Login(user); // Set the current user
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            Message = "Invalid username or password.";
+        }
+    }
+}

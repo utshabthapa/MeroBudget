@@ -13,7 +13,7 @@ namespace MeroBudget
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
-
+            builder.Services.AddSingleton<UserService>(); // Register UserService for DI
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

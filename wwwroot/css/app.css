@@ -1,4 +1,4 @@
-﻿html, body {
+﻿/*html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -83,4 +83,14 @@ h1:focus {
     .flex-column, .navbar-brand {
         padding-left: env(safe-area-inset-left);
     }
+}
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    background: #f5f5f5;
 }

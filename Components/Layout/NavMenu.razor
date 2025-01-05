@@ -1,27 +1,50 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MeroBudget</a>
+﻿<div class="w-full bg-white shadow-md h-16 px-20">
+    <div class="flex justify-content-between align-items-center h-full">
+        <div>
+            <a class="font-bold text-2xl" href="">MeroBudget</a>
+        </div>
+        <nav class="flex">
+            <div class="">
+                <NavLink class="navbar px-4 py- rounded-lg" href="" Match="NavLinkMatch.All">
+                    <span class="" aria-hidden="true"></span> Dashboard
+                </NavLink>
+            </div>
+            <div class="">
+                <NavLink class="navbar px-4 py- rounded-lg" href="transaction">
+                    <span class="" aria-hidden="true"></span> Transactions
+                </NavLink>
+            </div>
+            <div class="">
+                <NavLink class="navbar px-4 py- rounded-lg" href="debt">
+                    <span class="" aria-hidden="true"></span> Debt
+                </NavLink>
+            </div>
+
+        </nav>
+        <nav class="flex ">
+            <div class=" ">
+                <NavLink class="navbar px-4 py- rounded-lg" href="settings" >
+                    <span class="" aria-hidden="true"></span> Settings
+                </NavLink>
+            </div>
+            <div class="">
+                <NavLink class="navbar px-4 py- rounded-lg" href="profile">
+                    <span class="" aria-hidden="true"></span> Profile
+                </NavLink>
+            </div>
+        </nav>
+
     </div>
+
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<style>
+    .navbar:hover{
+        color: #2368f0
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    }
+    .navbar.active{
+        color: #2368f0;
+        background: #dee8ff
+    }
+</style>

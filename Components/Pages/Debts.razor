@@ -1,0 +1,193 @@
+﻿@page "/debt"
+@using MeroBudget.Models
+@inject UserService UserService
+
+<div class="bg-white p-6 rounded-2xl mt-12">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="font-bold text-2xl">User Debts</h1>
+
+        <div class="flex gap-8">
+            <!-- Tag Filter -->
+            <div class="">
+                <label for="tagFilter" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                <select id="tagFilter"
+                class="border border-gray-300 rounded-lg px-4 py-2"
+                @bind="SelectedTag"
+                @bind:event="onchange">
+                    <option value="All">All Tags</option>
+                    @foreach (var tag in UniqueTags)
+                    {
+                        <option value="@tag">@tag</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Default Date Range Filter -->
+            <div class="">
+                <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                <select id="dateFilter"
+                class="border border-gray-300 rounded-lg px-4 py-2"
+                @bind="SelectedDateFilter"
+                @bind:event="onchange">
+                    <option value="All">All Time</option>
+                    <option value="LastMonth">Last 1 Month</option>
+                    <option value="Last3Months">Last 3 Months</option>
+                    <option value="SpecificRange">Specific Date Range</option>
+                </select>
+            </div>
+
+            <!-- Specific Date Range Picker -->
+            @if (SelectedDateFilter == "SpecificRange")
+            {
+                <div class="flex gap-4">
+                    <div>
+                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input id="startDate" type="date"
+                        class="border border-gray-300 rounded-lg px-4 py-2"
+                        @bind="StartDate" />
+                    </div>
+                    <div>
+                        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input id="endDate" type="date"
+                        class="border border-gray-300 rounded-lg px-4 py-2"
+                        @bind="EndDate" />
+                    </div>
+                </div>
+            }
+
+            <!-- Search Filter -->
+
+            <div class="">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <input id="search" type="text"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-48"
+                placeholder="Search..."
+                @bind="SearchQuery"
+                @bind:event="oninput" />
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-6 mb-6">
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 flex-1">
+            <h2 class="text-green-700 font-medium text-lg">Total Debt</h2>
+            <p class="text-green-900 font-bold text-2xl">Rs.@Data.Debt.Sum(d => d.Amount)</p>
+        </div>
+        <div class="bg-blue-100 border border-blue-300 rounded-lg p-4 flex-1">
+            <h2 class="text-blue-700 font-medium text-lg">Remaining Debt</h2>
+            <p class="text-blue-900 font-bold text-2xl">Rs.@Data.Debt.Sum(d => d.Amount - d.PaidAmount)</p>
+        </div>
+    </div>
+    <div class="flex justify-end gap-4 mb-4">
+        <button @onclick="SortByLatest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Latest</button>
+        <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
+    </div>
+    <!-- Debt Table -->
+    <table class="table border-collapse border border-gray-300 w-full  overflow-scroll">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="border px-4 py-2">Debt ID</th>
+                <th class="border px-4 py-2">Total Debt</th>
+                <th class="border px-4 py-2">Paid Amount</th>
+                <th class="border px-4 py-2">Date</th>
+                <th class="border px-4 py-2">Tag</th>
+                <th class="border px-4 py-2">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var debt in FilteredDebts)
+            {
+                <tr>
+                    <td class="border px-4 py-2">#DBT00-@debt.Id</td>
+                    <td class="border px-4 py-2">Rs.@debt.Amount</td>
+                    <td class="border px-4 py-2">Rs.@debt.PaidAmount</td>
+                    <td class="border px-4 py-2">@debt.Date.ToString("MM/dd/yyyy")</td>
+                    <td class="border px-4 py-2">@debt.Tag</td>
+                    <td class="border px-4 py-2">@debt.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Redirect to Add Debt Page -->
+    <div class="text-center mt-6">
+        <NavLink class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 transition duration-200" href="/adddebt">Add New Debt</NavLink>
+    </div>
+</div>
+
+@code {
+    private AppData Data;
+    private string SearchQuery = string.Empty;
+    private string SelectedDateFilter = "All";
+    private string SelectedTag = "All";
+    private DateTime? StartDate;
+    private DateTime? EndDate;
+  
+    private IEnumerable<Debt> FilteredDebts;
+    private IEnumerable<string> UniqueTags => Data.Debt.Select(d => d.Tag).Distinct();
+
+    protected override void OnInitialized()
+    {
+        
+        Data = UserService.LoadData();
+        if (Data != null && Data.Debt != null)
+        {
+          
+            FilteredDebts = Data.Debt;
+            ApplyFilters();
+           
+        }
+        else
+        {
+            
+            FilteredDebts = new List<Debt>();
+        }
+    }
+    private void SortByLatest()
+    {
+   
+        FilteredDebts = FilteredDebts.OrderByDescending(d => d.Date);
+    }
+
+    private void SortByOldest()
+    {
+        FilteredDebts = FilteredDebts.OrderBy(d => d.Date);
+    }
+    private IEnumerable<Debt> ApplyFilters()
+    {
+        var filteredDebts = Data.Debt.AsEnumerable();
+
+        // Filter by Date
+        if (SelectedDateFilter == "LastMonth")
+        {
+            var lastMonth = DateTime.Now.AddMonths(-1);
+            filteredDebts = filteredDebts.Where(d => d.Date >= lastMonth);
+        }
+        else if (SelectedDateFilter == "Last3Months")
+        {
+            var last3Months = DateTime.Now.AddMonths(-3);
+            filteredDebts = filteredDebts.Where(d => d.Date >= last3Months);
+        }
+        else if (SelectedDateFilter == "SpecificRange" && StartDate.HasValue && EndDate.HasValue)
+        {
+            filteredDebts = filteredDebts.Where(d => d.Date >= StartDate && d.Date <= EndDate);
+        }
+
+        // Filter by Tag
+        if (SelectedTag != "All")
+        {
+            filteredDebts = filteredDebts.Where(d => d.Tag == SelectedTag);
+        }
+
+        // Filter by Search Query
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            filteredDebts = filteredDebts.Where(d =>
+                d.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                d.Tag.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        return filteredDebts;
+    }
+}

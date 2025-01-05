@@ -1,0 +1,226 @@
+﻿@page "/"
+@using MeroBudget.Models
+@inject UserService UserService
+
+<div class="px- py-6  overflow-hidden">
+    <!-- Greeting Section -->
+    <h1 class="text-4xl font-semibold pt-6">Hello, Utshab!</h1>
+
+    <!-- Main Metrics Section -->
+    <div class="grid grid-cols-3 gap-9 mt-10">
+        <!-- Balance -->
+        <div class="bg-blue-100 p-6 rounded-2xl shadow-sm ">
+            <h3 class="text-lg font-semibold">Balance</h3>
+            <p class="text-3xl font-bold text-blue-600 mt-2">Rs.@balance.ToString("N2")</p>
+         
+        </div>
+        <!-- Cash Inflow -->
+        <div class="bg-green-100 p-6 rounded-2xl shadow-sm">
+            <h3 class="text-lg font-semibold">Cash Inflow</h3>
+            <p class="text-3xl font-bold text-green-600 mt-2">Rs.@cashInflow.ToString("N2")</p>
+       
+        </div>
+        <!-- Cash Outflow -->
+        <div class="bg-red-100 p-6 rounded-2xl shadow-sm">
+            <h3 class="text-lg font-semibold">Cash Outflow</h3>
+            <p class="text-3xl font-bold text-red-600 mt-2">Rs.@cashOutflow.ToString("N2")</p>
+           
+        </div>
+        <!-- Total Debt -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <h3 class="text-lg font-semibold">Total Debt</h3>
+            <p class="text-3xl font-bold text-red-600 mt-2">Rs.@totalDebt.ToString("N2")</p>
+        
+        </div>
+        <!-- Cleared Debt -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <h3 class="text-lg font-semibold">Cleared Debt</h3>
+            <p class="text-3xl font-bold text-green-600 mt-2">Rs.@clearedDebt.ToString("N2")</p>
+           
+        </div>
+        <!-- Remaining Debt -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <h3 class="text-lg font-semibold">Remaining Debt</h3>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">Rs.@remainingDebt.ToString("N2")</p>
+           
+        </div>
+    </div>
+
+    <div class="grid grid-cols-9 gap-9 mt-12">
+        <div class="grid grid-row-3 col-span-2 gap-6 align-items-center ">
+        <a href="addincome" class="bg-green-600 text-white p-10 rounded-xl shadow-sm text-center hover:bg-green-700">
+            <span class="font-semibold">Add Income</span>
+            <p class="text-sm">Create an income manually</p>
+        </a>
+        <a href="addexpense" class="bg-red-700 text-white p-10 rounded-xl shadow-sm text-center hover:bg-red-800">
+            <span class="font-semibold">Add Expense</span>
+            <p class="text-sm">Create an expense manually</p>
+        </a>
+        <a href="adddebt" class="bg-blue-500 text-white p-10 rounded-xl shadow-sm text-center hover:bg-blue-600">
+            <span class="font-semibold">Add Debt</span>
+            <p class="text-sm">Add Debts Manually</p>
+        </a>
+    </div>
+
+
+        <div class="bg-white col-span-5 p-6 rounded-2xl shadow-sm">
+        <h3 class="text-xl font-bold">Top 5 Transactions</h3>
+        <table class="mt-4 w-full border-t border-gray-200">
+                <thead class="bg-gray-200">
+                <tr class="text-left text-gray-500">
+                        <th class="px-4 py-2">Transaction ID</th>
+                        <th class="px-4 py-2">Type</th>
+                        <th class="px-4 py-2">Labels</th>
+                        <th class="px-4 py-2">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in topTransactions)
+                {
+                    <tr class="border-t">
+                            <td class="border px-4 py-3">#TRNSC00-@transaction.Id</td>
+                            <td class="border px-4 py-3">@transaction.Type</td>
+                            <td class="border px-4 py-3">@transaction.Description</td>
+                            <td class="border px-4 py-3">
+                                @(transaction.Credit > 0 ? "Rs." : "Rs.")
+                            @if (transaction.Credit > 0)
+                            {
+                                @transaction.Credit
+                            }
+                            else
+                            {
+                                @transaction.Debit
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+        <div class="bg-white col-span-2 rounded-2xl shadow-sm">
+            <div class="bg-red-600 text-white text-xl font-bold px-4 py-3 rounded-t-2xl">
+                Pending Debts
+            </div>
+            <table class=" w-full text-sm border-t border-gray-300 overflow-hidden">
+                <thead>
+                    <tr class="bg-red-100 uppercase text-xs tracking-wide">
+                        <th class="py-4 px-4 text-left">Debt ID</th>
+                        <th class="py-4 px-4 text-left">Tag</th>
+                        <th class="py-4 px-4 text-left">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (pendingDebts != null && pendingDebts.Any())
+                    {
+                        @foreach (var debtss in pendingDebts)
+                        {
+                            <tr class="bg-white hover:bg-red-50 transition-colors border-t border-gray-200">
+                                <td class="py-3 px-4 font-semibold text-gray-700">#DBT00-@debtss.Id</td>
+                                <td class="py-3 px-4 text-gray-600">@debtss.Tag</td>
+                                <td class="py-3 px-4 text-red-700 font-bold">Rs.@debtss.Amount.ToString("N2")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="py-6 text-center text-gray-500 italic">No pending debts found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+</div>
+
+@code {
+    private decimal cashInflow;
+    private decimal cashOutflow;
+    private decimal balance;
+    private decimal totalDebt;
+    private decimal clearedDebt;
+    private decimal remainingDebt;
+    private List<Debt> pendingDebts;
+    private List<Transaction> topTransactions;
+    private AppData Data;
+
+    protected override void OnInitialized()
+    {
+        // Fetching AppData from UserService
+        Data = UserService.LoadData();
+
+        // Fetching all transactions from AppData
+        var transactions = Data.Transactions;
+
+        // Fetching all transactions from AppData
+        var debts = Data.Debt;
+
+        // Calculating Cash Inflow (sum of Credit)
+        cashInflow = transactions.Sum(t => t.Credit);
+
+        // Calculating Cash Outflow (sum of Debit)
+        cashOutflow = transactions.Sum(t => t.Debit);
+
+        // Calculating Balance (Cash Inflow - Cash Outflow)
+        balance = cashInflow - cashOutflow;
+
+        // Calculating Debt Data (just for example purposes)
+        totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
+        clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
+        remainingDebt = totalDebt - clearedDebt;
+
+        pendingDebts = debts
+           .Select(d => new Debt
+               {
+                   Id = d.Id,
+				   Amount = d.Amount,
+				   Tag = d.Tag
+
+               })
+           .OrderByDescending(t => t.Amount)
+           .Take(5)
+           .ToList();
+
+        // Mapping to custom Transaction type for top transactions
+        topTransactions = transactions
+            .Select(t => new Transaction
+                {
+                    Id = t.Id,
+                    Type = t.Credit > 0 ? "Credit" : "Debit",
+                    Description = t.Description,
+                    Credit = t.Credit,
+                    Debit = t.Debit,
+                    Date = t.Date,
+                    Tags = t.Tags
+                })
+            .OrderByDescending(t => t.Credit > 0 ? t.Credit : t.Debit)
+            .Take(5)
+            .ToList();
+    }
+
+    // Custom Transaction model for mapping
+    public class Transaction
+    {
+        public int Id { get; set; }
+        public string Type { get; set; }  // Either "Credit" or "Debit"
+        public string Description { get; set; }
+        public decimal Credit { get; set; }
+        public decimal Debit { get; set; }
+        public DateTime Date { get; set; }
+        public string Tags { get; set; }
+    }
+
+    public class Debt
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; } // Link debt to a user
+        public decimal Amount { get; set; } // Total debt amount
+        public decimal PaidAmount { get; set; } // Amount paid towards debt
+        public DateTime Date { get; set; }
+        public string Description { get; set; }
+		public string Tag { get; set; }
+    }
+}

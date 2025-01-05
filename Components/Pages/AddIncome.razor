@@ -1,0 +1,71 @@
+﻿@page "/addincome"
+@using MeroBudget.Models
+@inject UserService UserService
+
+<div class="flex align-items-center h-100">
+
+<div style="width:600px;" class="mx-auto bg-white rounded-2xl p-6 my-auto">
+
+<h1 class="text-center font-bold text-2xl">Add Income</h1>
+
+<EditForm Model="newIncome" OnValidSubmit="HandleIncomeSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="amount">Amount</label>
+                <InputNumber class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" id="amount" @bind-Value="newIncome.Credit" placeholder="Enter amount" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="source">Source</label>
+                <InputText class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" id="source" @bind-Value="newIncome.Description" placeholder="Enter income source" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="tags">Tags</label>
+                <InputText class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" id="tags" @bind-Value="newIncome.Tags" placeholder="Add tag" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="date">Date</label>
+                <InputDate class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" id="date" @bind-Value="newIncome.Date"  />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="additionalNotes">Additional Notes</label>
+                <InputText rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" id="additionalNotes" @bind-Value="newIncome.AdditionalNotes" placeholder="Enter any additional notes" />
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-500 transition duration-200">Add Income</button>
+            </div>
+</EditForm>
+</div>
+</div>
+
+
+
+@code {
+    private AppData Data;
+    private Transactions newIncome = new Transactions();
+
+    protected override void OnInitialized()
+    {
+        Data = UserService.LoadData();
+    }
+
+    private void HandleIncomeSubmit()
+    {
+        newIncome.Id = Data.Transactions.Count + 1;
+        // If the date is not set (default value), use DateTime.Now
+        newIncome.Date = newIncome.Date == default ? DateTime.Now : newIncome.Date;
+        newIncome.Credit = newIncome.Credit; // Ensure income (credit) is being tracked
+        newIncome.Debit = 0; // No debit for income
+        Data.Transactions.Add(newIncome);
+        UserService.SaveData(Data);
+
+        // Reset form
+        newIncome = new Transactions();
+    }
+}

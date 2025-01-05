@@ -1,0 +1,275 @@
+﻿@page "/transaction"
+@using MeroBudget.Models
+@inject UserService UserService
+
+<div class="bg-white p-6 rounded-2xl mt-12">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="font-bold text-2xl">User Transactions</h1>
+
+        <div class="flex gap-8">
+            <!-- Filter by Category -->
+            <div>
+                <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select id="categoryFilter" @onchange="FilterByCategory" class="border border-gray-300 rounded-lg px-4 py-2">
+                    <option value="All">All</option>
+                    <option value="Credit">Credit</option>
+                    <option value="Debit">Debit</option>
+                </select>
+            </div>
+
+            <!-- Filter by Tags -->
+            <div>
+                <label for="tagFilter" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                <select id="tagFilter" @onchange="FilterByTag" class="border border-gray-300 rounded-lg px-4 py-2">
+                    <option value="All">All Tags</option>
+                    @foreach (var tag in AvailableTags)
+                    {
+                        <option value="@tag">@tag</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Filter by Date -->
+            <div>
+                <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                <select id="dateFilter" @onchange="FilterByDate" class="border border-gray-300 rounded-lg px-4 py-2">
+                    <option value="All">All Time</option>
+                    <option value="LastMonth">Last Month</option>
+                    <option value="Last3Months">Last 3 Months</option>
+                    <option value="SpecificRange">Specific Date Range</option>
+                </select>
+            </div>
+
+            <!-- Specific Date Range -->
+            @if (SelectedDateFilter == "SpecificRange")
+            {
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" @oninput="UpdateStartDate" class="border border-gray-300 rounded-lg px-4 py-2" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input type="date" @oninput="UpdateEndDate" class="border border-gray-300 rounded-lg px-4 py-2" />
+                </div>
+            }
+
+            <!-- Search -->
+            <div>
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <input type="text"
+                       id="search"
+                       placeholder="Search..."
+                       @oninput="SearchTransactions"
+                       class="border border-gray-300 rounded-lg px-4 py-2 w-48" />
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Summary Cards Section -->
+    <div class="flex gap-6 mb-6">
+        <!-- Main Balance -->
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 flex-1">
+            <h2 class="text-green-700 font-medium text-lg">Main Balance</h2>
+            <p class="text-green-900 font-bold text-2xl">Rs.@MainBalance.ToString("")</p>
+        </div>
+
+        <!-- Total Transactions -->
+        <div class="bg-blue-100 border border-blue-300 rounded-lg p-4 flex-1">
+            <h2 class="text-blue-700 font-medium text-lg">Total Transactions</h2>
+            <p class="text-blue-900 font-bold text-2xl">@FilteredTransactions.Count()</p>
+        </div>
+    </div>
+    <!-- Sorting Section -->
+    <div class="flex justify-end gap-4 mb-4">
+        <button @onclick="SortByLatest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Latest</button>
+        <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
+    </div>
+    <!-- Transactions Table -->
+    <table class=" border-collapse border border-gray-300 w-full  overflow-scroll">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2">Transaction ID</th>
+                <th class="px-4 py-2">Category</th>
+                <th class="px-4 py-2">Amount</th>
+                <th class="px-4 py-2">Date</th>
+                <th class="px-4 py-2">Source/Purpose</th>
+                <th class="px-4 py-2">Tags</th>
+                <th class="px-4 py-2">Additional Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in FilteredTransactions)
+            {
+                <tr>
+                    <td class="border px-4 py-2">#TRNSC00-@transaction.Id</td>
+
+                    <td class="border px-4 py-2">
+                        @if (transaction.Credit > 0)
+                        {
+                            <span class="text-green-600">Credit</span>
+                        }
+                        else
+                        {
+                            <span class="text-red-600">Debit</span>
+                        }
+                    </td>
+                    <td class="border px-4 py-2">
+                        @if (transaction.Credit > 0)
+                        {
+                            <span class="text-green-600">Rs.@transaction.Credit.ToString("")</span>
+                        }
+                        else
+                        {
+                            <span class="text-red-600">Rs.@transaction.Debit.ToString("")</span>
+                        }
+                    </td>
+                    <td class="border px-4 py-2">@transaction.Date.ToString("MM/dd/yyyy")</td>
+                    <td class="border px-4 py-2">@transaction.Description</td>
+                    <td class="border px-4 py-2">@transaction.Tags</td>
+                    <td class="border px-4 py-2">@transaction.AdditionalNotes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private AppData Data;
+    private IEnumerable<Transactions> FilteredTransactions;
+    private IEnumerable<string> AvailableTags;
+    private string SelectedCategory = "All";
+    private string SelectedTag = "All";
+    private string SelectedDateFilter = "All";
+    private string SearchQuery = "";
+    private DateTime? StartDate;
+    private DateTime? EndDate;
+
+    private decimal MainBalance => Data.Transactions.Sum(t => t.Credit) - Data.Transactions.Sum(t => t.Debit);
+
+    protected override void OnInitialized()
+    {
+        Data = UserService.LoadData();
+
+        if (Data != null && Data.Transactions != null)
+        {
+            AvailableTags = Data.Transactions
+                .Where(t => t.Tags != null)
+                .SelectMany(t => t.Tags.Split(','))
+                .Distinct()
+                .ToList();
+
+            FilteredTransactions = Data.Transactions;
+            ApplyFilters();
+        }
+        else
+        {
+            AvailableTags = new List<string>();
+            FilteredTransactions = new List<Transactions>();
+        }
+    }
+
+    private void FilterByCategory(ChangeEventArgs e)
+    {
+        SelectedCategory = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void FilterByTag(ChangeEventArgs e)
+    {
+        SelectedTag = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void FilterByDate(ChangeEventArgs e)
+    {
+        SelectedDateFilter = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void SearchTransactions(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value.ToString();
+        ApplyFilters();
+    }
+
+    private void UpdateStartDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            StartDate = date;
+            ApplyFilters();
+        }
+    }
+
+    private void UpdateEndDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            EndDate = date;
+            ApplyFilters();
+        }
+    }
+
+    private void SortByLatest()
+    {
+        FilteredTransactions = FilteredTransactions.OrderByDescending(t => t.Date);
+    }
+
+    private void SortByOldest()
+    {
+        FilteredTransactions = FilteredTransactions.OrderBy(t => t.Date);
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredTransactions = Data.Transactions;
+
+        if (SelectedCategory != "All")
+        {
+            FilteredTransactions = SelectedCategory == "Credit"
+                ? FilteredTransactions.Where(t => t.Credit > 0)
+                : FilteredTransactions.Where(t => t.Debit > 0);
+        }
+
+        if (SelectedTag != "All")
+        {
+            FilteredTransactions = FilteredTransactions.Where(t => t.Tags.Contains(SelectedTag));
+        }
+
+        if (SelectedDateFilter == "LastMonth")
+        {
+            var lastMonth = DateTime.Now.AddMonths(-1);
+            FilteredTransactions = FilteredTransactions.Where(t => t.Date >= lastMonth);
+        }
+        else  if (SelectedDateFilter == "Last3Months")
+        {
+            var last3Months = DateTime.Now.AddMonths(-3);
+            FilteredTransactions = FilteredTransactions.Where(t => t.Date >= last3Months);
+        }
+        else if (SelectedDateFilter == "SpecificRange")
+        {
+            if (StartDate.HasValue)
+            {
+                FilteredTransactions = FilteredTransactions.Where(t => t.Date >= StartDate.Value);
+            }
+
+            if (EndDate.HasValue)
+            {
+                FilteredTransactions = FilteredTransactions.Where(t => t.Date <= EndDate.Value);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            FilteredTransactions = FilteredTransactions.Where(t =>
+                t.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                t.Tags.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                (t.Credit > 0 && "Credit".Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (t.Debit > 0 && "Debit".Contains(SearchQuery, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+    }
+}
+
