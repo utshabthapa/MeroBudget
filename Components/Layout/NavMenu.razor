@@ -5,7 +5,7 @@
         </div>
         <nav class="flex">
             <div class="">
-                <NavLink class="navbar px-4 py- rounded-lg" href="" Match="NavLinkMatch.All">
+                <NavLink class="navbar px-4 py- rounded-lg" href="dashboard" Match="NavLinkMatch.All">
                     <span class="" aria-hidden="true"></span> Dashboard
                 </NavLink>
             </div>
@@ -22,16 +22,12 @@
 
         </nav>
         <nav class="flex ">
-            <div class=" ">
-                <NavLink class="navbar px-4 py- rounded-lg" href="settings" >
-                    <span class="" aria-hidden="true"></span> Settings
-                </NavLink>
-            </div>
             <div class="">
-                <NavLink class="navbar px-4 py- rounded-lg" href="profile">
-                    <span class="" aria-hidden="true"></span> Profile
+                <NavLink class="logout  px-4 py-2 rounded-lg" href="" >
+                    <span class="" aria-hidden="true"></span> Logout
                 </NavLink>
             </div>
+            
         </nav>
 
     </div>
@@ -46,5 +42,15 @@
     .navbar.active{
         color: #2368f0;
         background: #dee8ff
+    }
+
+    .logout:hover {
+        color: #9c0808;
+        background: #fab1b1
+    }
+
+    .logout {
+        color: #f03123;
+        background: #f7cdcd
     }
 </style>

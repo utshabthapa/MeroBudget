@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/dashboard"
 @using MeroBudget.Models
 @inject UserService UserService
 
@@ -164,29 +164,30 @@
         // Calculating Cash Outflow (sum of Debit)
 
         // Calculating Balance (Cash Inflow - Cash Outflow)
-       
+
 
         // Calculating Debt Data (just for example purposes)
         totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
         clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
         remainingDebt = totalDebt - clearedDebt;
 
-        cashInflow = transactions.Sum(t => t.Credit) + remainingDebt - clearedDebt;
+        cashInflow = transactions.Sum(t => t.Credit) + remainingDebt;
         cashOutflow = transactions.Sum(t => t.Debit);
 
         balance = cashInflow  - cashOutflow;
 
+        // Selecting the top 5 remaining debts (Amount - PaidAmount)
         pendingDebts = debts
-           .Select(d => new Debt
-               {
-                   Id = d.Id,
-				   Amount = d.Amount,
-				   Tag = d.Tag
-
-               })
-           .OrderByDescending(t => t.Amount)
-           .Take(5)
-           .ToList();
+            .Where(d => d.Amount > d.PaidAmount)  // Filter debts where remaining debt > 0
+            .Select(d => new Debt
+                {
+                    Id = d.Id,
+                    Amount = d.Amount - d.PaidAmount,  // Show remaining debt
+                    Tag = d.Tag
+                })
+            .OrderByDescending(d => d.Amount)    // Order by remaining debt (descending)
+            .Take(5)                             // Take top 5
+            .ToList();
 
         // Mapping to custom Transaction type for top transactions
         topTransactions = transactions

@@ -1,28 +1,88 @@
 ﻿@page "/register"
+@using MeroBudget.Components.Layout
+@layout LoginLayout
 @using MeroBudget.Models
 @inject UserService UserService
 @inject NavigationManager NavigationManager
 
-<h3>Register</h3>
 
-<div>
-    <input @bind="RegisterUsername" placeholder="Username" />
-    <input @bind="RegisterPassword" placeholder="Password" type="password" />
-    <input @bind="RegisterEmail" placeholder="Email" />
-    <button @onclick="Register">Register</button>
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create Account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Sign up to start using MeroBudget
+            </p>
+        </div>
+        <div class="mt-8 space-y-6">
+            <div class="rounded-md shadow- space-y-4">
+                <div>
+                    <label for="username" class="text-sm font-medium text-gray-700">Username</label>
+                    <input id="username"
+                           type="text"
+                           @bind="RegisterUsername"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           placeholder="Choose a username" />
+                </div>
+                <div>
+                    <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+                    <input id="email"
+                           type="email"
+                           @bind="RegisterEmail"
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           placeholder="Enter your email" />
+                </div>
+                <div class="relative">
+                    <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                    <div class="relative">
+                        <input id="password"
+                               type="password"
+                               @bind="RegisterPassword"
+                               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                               placeholder="Create a password" />
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button @onclick="Register"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Create Account
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="mt-2 text-sm text-center @(Message.Contains("successful") ? "text-green-600" : "text-red-600")">
+                    @Message
+                </div>
+            }
+
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    Already have an account?
+                    <a href="/" class="font-medium text-gray-900 hover:text-gray-700">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
-
-@if (!string.IsNullOrEmpty(Message))
-{
-        <p>@Message</p>
-}
 
 @code {
     private string RegisterUsername = "";
     private string RegisterPassword = "";
     private string RegisterEmail = "";
     private string Message = "";
-
     private List<User> Users = new();
 
     protected override void OnInitialized()
@@ -44,32 +104,16 @@
             return;
         }
 
-        // Create new user and hash the password
         var newUser = new User
             {
                 Username = RegisterUsername,
-                Password = UserService.HashPassword(RegisterPassword),  // Hash the password
+                Password = UserService.HashPassword(RegisterPassword),
                 Email = RegisterEmail
             };
 
         Users.Add(newUser);
         UserService.SaveUsers(Users);
-
         Message = "Registration successful. Redirecting to login...";
-        Task.Delay(2000).ContinueWith(_ => NavigationManager.NavigateTo("/login"));
+        Task.Delay(2000).ContinueWith(_ => NavigationManager.NavigateTo("/"));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
