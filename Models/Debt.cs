@@ -13,6 +13,8 @@ namespace MeroBudget.Models
         public decimal Amount { get; set; } // New Debt Amount (Total debt)
         public decimal PaidAmount { get; set; } // Debt Paid Amount
         public DateTime Date { get; set; }
+        public DateTime DueDate { get; set; }
+
         public string Description { get; set; }
         public string Tag { get; set; }
 

@@ -87,7 +87,9 @@
         <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
     </div>
     <!-- Transactions Table -->
-    <table class=" border-collapse border border-gray-300 w-full  overflow-scroll">
+    <div style="max-height: 400px;" class="w-full overflow-y-auto">
+
+    <table class=" border-collapse border border-gray-300 w-full">
         <thead class="bg-gray-200">
             <tr>
                 <th class="px-4 py-2">Transaction ID</th>
@@ -99,6 +101,7 @@
                 <th class="px-4 py-2">Additional Notes</th>
             </tr>
         </thead>
+        
         <tbody>
             @foreach (var transaction in FilteredTransactions)
             {
@@ -132,11 +135,20 @@
                 </tr>
             }
         </tbody>
+
     </table>
+    </div>
+
 </div>
 
 @code {
     private AppData Data;
+    private decimal cashInflow;
+    private decimal cashOutflow;
+    private decimal totalDebt;
+    private decimal clearedDebt;
+    private decimal remainingDebt;
+    private List<Debt> pendingDebts;
     private IEnumerable<Transactions> FilteredTransactions;
     private IEnumerable<string> AvailableTags;
     private string SelectedCategory = "All";
@@ -145,12 +157,33 @@
     private string SearchQuery = "";
     private DateTime? StartDate;
     private DateTime? EndDate;
+    private decimal MainBalance;
 
-    private decimal MainBalance => Data.Transactions.Sum(t => t.Credit) - Data.Transactions.Sum(t => t.Debit);
+    
 
     protected override void OnInitialized()
     {
         Data = UserService.LoadData();
+        var transactions = Data.Transactions;
+
+        // Fetching all transactions from AppData
+        var debts = Data.Debt;
+
+        // Calculating Cash Inflow (sum of Credit)
+
+        // Calculating Cash Outflow (sum of Debit)
+
+        // Calculating Balance (Cash Inflow - Cash Outflow)
+
+        // Calculating Debt Data (just for example purposes)
+        totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
+        clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
+        remainingDebt = totalDebt - clearedDebt;
+
+        cashInflow = transactions.Sum(t => t.Credit) + remainingDebt - clearedDebt;
+        cashOutflow = transactions.Sum(t => t.Debit) ;
+
+        MainBalance = cashInflow - cashOutflow;
 
         if (Data != null && Data.Transactions != null)
         {

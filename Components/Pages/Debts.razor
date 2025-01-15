@@ -83,32 +83,47 @@
         <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
     </div>
     <!-- Debt Table -->
-    <table class="table border-collapse border border-gray-300 w-full  overflow-scroll">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="border px-4 py-2">Debt ID</th>
-                <th class="border px-4 py-2">Total Debt</th>
-                <th class="border px-4 py-2">Paid Amount</th>
-                <th class="border px-4 py-2">Date</th>
-                <th class="border px-4 py-2">Tag</th>
-                <th class="border px-4 py-2">Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var debt in FilteredDebts)
-            {
-                <tr>
-                    <td class="border px-4 py-2">#DBT00-@debt.Id</td>
-                    <td class="border px-4 py-2">Rs.@debt.Amount</td>
-                    <td class="border px-4 py-2">Rs.@debt.PaidAmount</td>
-                    <td class="border px-4 py-2">@debt.Date.ToString("MM/dd/yyyy")</td>
-                    <td class="border px-4 py-2">@debt.Tag</td>
-                    <td class="border px-4 py-2">@debt.Description</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div style="max-height: 400px;" class="w-full overflow-y-auto">
 
+        <table class="table border-collapse border border-gray-300 w-full overflow-scroll">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-4 py-2">Debt ID</th>
+                    <th class="border px-4 py-2">Total Debt</th>
+                    <th class="border px-4 py-2">Paid Amount</th>
+                    <th class="border px-4 py-2">Date</th>
+                    <th class="border px-4 py-2">Due Date</th>
+                    <th class="border px-4 py-2">Tag</th>
+                    <th class="border px-4 py-2">Description</th>
+                    <th class="border px-4 py-2">Actions</th> <!-- New column for actions -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var debt in FilteredDebts.ToList())
+                {
+                    <tr>
+                        <td class="border px-4 py-2">#DBT00-@debt.Id</td>
+                        <td class="border px-4 py-2">Rs.@debt.Amount</td>
+                        <td class="border px-4 py-2">Rs.@debt.PaidAmount</td>
+                        <td class="border px-4 py-2">@debt.Date.ToString("MM/dd/yyyy")</td>
+                        <td class="border px-4 py-2">@debt.DueDate.ToString("MM/dd/yyyy")</td>
+                        <td class="border px-4 py-2">@debt.Tag</td>
+                        <td class="border px-4 py-2">@debt.Description</td>
+                        <td class="border px-4 py-2 text-center">
+                            @if (debt.Amount >= 0)
+                            {
+                                <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                        @onclick="() => DeleteDebt(debt.Id)">
+                                    Cleared
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
     <!-- Redirect to Add Debt Page -->
     <div class="text-center mt-6">
         <NavLink class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 transition duration-200" href="/adddebt">Add New Debt</NavLink>
@@ -125,6 +140,19 @@
   
     private IEnumerable<Debt> FilteredDebts;
     private IEnumerable<string> UniqueTags => Data.Debt.Select(d => d.Tag).Distinct();
+    private void DeleteDebt(int debtId)
+    {
+        if (UserService.DeleteDebtById(debtId))
+        {
+            // Refresh the UI
+            FilteredDebts = FilteredDebts.Where(d => d.Id != debtId).ToList();
+        }
+        else
+        {
+            // Handle case where the debt was not found
+            Console.WriteLine("Debt not found.");
+        }
+    }
 
     protected override void OnInitialized()
     {

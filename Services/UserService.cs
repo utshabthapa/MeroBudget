@@ -10,6 +10,7 @@ public class UserService
     private static readonly string FolderPath = Path.Combine(DesktopPath, "LocalDB");
     private static readonly string FilePath = Path.Combine(FolderPath, "appdata.json");
 
+
     public User CurrentUser { get; private set; }
 
     // Load AppData (Users, Transactions, Debts) from JSON file
@@ -51,6 +52,27 @@ public class UserService
         File.WriteAllText(FilePath, json);
     }
 
+    public bool DeleteDebtById(int debtId)
+    {
+        // Load the existing AppData
+        var data = LoadData();
+
+        // Find the Debt with the specified ID
+        var debtToRemove = data.Debt.FirstOrDefault(d => d.Id == debtId);
+
+        if (debtToRemove != null)
+        {
+            // Remove the Debt from the list
+            data.Debt.Remove(debtToRemove);
+
+            // Save the updated AppData back to the JSON file
+            SaveData(data);
+
+            return true; // Indicate successful deletion
+        }
+
+        return false; // Indicate that the Debt was not found
+    }
     // Manage Users within AppData
     public List<User> LoadUsers()
     {
