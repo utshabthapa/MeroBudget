@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace MeroBudget.Models
         public DateTime DueDate { get; set; }
 
         public string Description { get; set; }
+
+        [Required(ErrorMessage = "Tags are required")]
         public string Tag { get; set; }
 
         public string Status { get; set; }

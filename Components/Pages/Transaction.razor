@@ -1,6 +1,8 @@
 ﻿@page "/transaction"
 @using MeroBudget.Models
 @inject UserService UserService
+@inject IJSRuntime JSRuntime
+
 
 <div class="bg-white p-6 rounded-2xl mt-12">
     <div class="flex justify-between items-center mb-6">
@@ -57,15 +59,15 @@
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                 <input type="text"
-                       id="search"
-                       placeholder="Search..."
-                       @oninput="SearchTransactions"
-                       class="border border-gray-300 rounded-lg px-4 py-2 w-48" />
+                id="search"
+                placeholder="Search..."
+                @oninput="SearchTransactions"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-48" />
             </div>
         </div>
     </div>
 
-    
+
 
     <!-- Summary Cards Section -->
     <div class="flex gap-6 mb-6">
@@ -81,62 +83,138 @@
             <p class="text-blue-900 font-bold text-2xl">@FilteredTransactions.Count()</p>
         </div>
     </div>
+    <div class="flex gap-6 mb-6">
+
+        <!-- Highest Inflow -->
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 flex-1">
+            <h2 class="text-green-700 font-medium text-lg">Highest Inflow</h2>
+            <p class="text-green-900 font-bold text-2xl">
+                @(HighestInflowTransaction != null ? "Rs." : "Rs.")
+                @if (HighestInflowTransaction != null)
+                {
+                    @HighestInflowTransaction.Credit.ToString("")
+                }
+                else
+                {
+                    <p>N / A</p>
+                }
+            </p>
+        </div>
+
+        <!-- Lowest Inflow -->
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 flex-1">
+            <h2 class="text-green-700 font-medium text-lg">Lowest Inflow</h2>
+            <p class="text-green-900 font-bold text-2xl">
+                @(LowestInflowTransaction != null ? "Rs." : "Rs.")
+
+                @if (LowestInflowTransaction != null)
+                {
+                    @LowestInflowTransaction.Credit.ToString("")
+                }
+                else
+                {
+                    <p>N / A</p>
+                }
+            </p>
+        </div>
+
+        <!-- Highest Outflow -->
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 flex-1">
+            <h2 class="text-red-700 font-medium text-lg">Highest Outflow</h2>
+            <p class="text-red-900 font-bold text-2xl">
+                @(HighestOutflowTransaction != null ? "Rs." : "Rs.")
+
+                @if (HighestOutflowTransaction != null)
+                {
+                    @HighestOutflowTransaction.Debit.ToString("")
+                }
+                else
+                {
+                    <p>N / A</p>
+                }
+            </p>
+        </div>
+
+        <!-- Lowest Outflow -->
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 flex-1">
+            <h2 class="text-red-700 font-medium text-lg">Lowest Outflow</h2>
+            <p class="text-red-900 font-bold text-2xl">
+                @(LowestOutflowTransaction != null ? "Rs." : "Rs.")
+
+                @if (LowestOutflowTransaction != null)
+                {
+                    @LowestOutflowTransaction.Debit.ToString("")
+                }
+                else
+                {
+                    <p>N / A</p>
+                }
+            </p>
+        </div>
+
+    </div>
+
     <!-- Sorting Section -->
     <div class="flex justify-end gap-4 mb-4">
         <button @onclick="SortByLatest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Latest</button>
         <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
+        <div>
+            <button @onclick="DownloadTransactionsAsExcel" class="bg-gray-800 text-white text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-900">
+                Download as Excel
+            </button>
+        </div>
     </div>
     <!-- Transactions Table -->
     <div style="max-height: 400px;" class="w-full overflow-y-auto">
 
-    <table class=" border-collapse border border-gray-300 w-full">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="px-4 py-2">Transaction ID</th>
-                <th class="px-4 py-2">Category</th>
-                <th class="px-4 py-2">Amount</th>
-                <th class="px-4 py-2">Date</th>
-                <th class="px-4 py-2">Source/Purpose</th>
-                <th class="px-4 py-2">Tags</th>
-                <th class="px-4 py-2">Additional Notes</th>
-            </tr>
-        </thead>
-        
-        <tbody>
-            @foreach (var transaction in FilteredTransactions)
-            {
+        <table class=" border-collapse border border-gray-300 w-full">
+            <thead class="bg-gray-200">
                 <tr>
-                    <td class="border px-4 py-2">#TRNSC00-@transaction.Id</td>
-
-                    <td class="border px-4 py-2">
-                        @if (transaction.Credit > 0)
-                        {
-                            <span class="text-green-600">Credit</span>
-                        }
-                        else
-                        {
-                            <span class="text-red-600">Debit</span>
-                        }
-                    </td>
-                    <td class="border px-4 py-2">
-                        @if (transaction.Credit > 0)
-                        {
-                            <span class="text-green-600">Rs.@transaction.Credit.ToString("")</span>
-                        }
-                        else
-                        {
-                            <span class="text-red-600">Rs.@transaction.Debit.ToString("")</span>
-                        }
-                    </td>
-                    <td class="border px-4 py-2">@transaction.Date.ToString("MM/dd/yyyy")</td>
-                    <td class="border px-4 py-2">@transaction.Description</td>
-                    <td class="border px-4 py-2">@transaction.Tags</td>
-                    <td class="border px-4 py-2">@transaction.AdditionalNotes</td>
+                    <th class="px-4 py-2">Transaction ID</th>
+                    <th class="px-4 py-2">Category</th>
+                    <th class="px-4 py-2">Amount</th>
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Source/Purpose</th>
+                    <th class="px-4 py-2">Tags</th>
+                    <th class="px-4 py-2">Additional Notes</th>
                 </tr>
-            }
-        </tbody>
+            </thead>
 
-    </table>
+            <tbody>
+                @foreach (var transaction in FilteredTransactions)
+                {
+                    <tr>
+                        <td class="border px-4 py-2">#TRNSC00-@transaction.Id</td>
+
+                        <td class="border px-4 py-2">
+                            @if (transaction.Credit > 0)
+                            {
+                                <span class="text-green-600">Credit</span>
+                            }
+                            else
+                            {
+                                <span class="text-red-600">Debit</span>
+                            }
+                        </td>
+                        <td class="border px-4 py-2">
+                            @if (transaction.Credit > 0)
+                            {
+                                <span class="text-green-600">Rs.@transaction.Credit.ToString("")</span>
+                            }
+                            else
+                            {
+                                <span class="text-red-600">Rs.@transaction.Debit.ToString("")</span>
+                            }
+                        </td>
+                        <td class="border px-4 py-2">@transaction.Date.ToString("MM/dd/yyyy")</td>
+                        <td class="border px-4 py-2">@transaction.Description</td>
+                        <td class="border px-4 py-2">@transaction.Tags</td>
+                        <td class="border px-4 py-2">@transaction.AdditionalNotes</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
     </div>
 
 </div>
@@ -158,8 +236,12 @@
     private DateTime? StartDate;
     private DateTime? EndDate;
     private decimal MainBalance;
+    private Transactions HighestInflowTransaction;
+    private Transactions HighestOutflowTransaction;
+    private Transactions LowestInflowTransaction;
+    private Transactions LowestOutflowTransaction;
 
-    
+
 
     protected override void OnInitialized()
     {
@@ -169,13 +251,7 @@
         // Fetching all transactions from AppData
         var debts = Data.Debt;
 
-        // Calculating Cash Inflow (sum of Credit)
 
-        // Calculating Cash Outflow (sum of Debit)
-
-        // Calculating Balance (Cash Inflow - Cash Outflow)
-
-        // Calculating Debt Data (just for example purposes)
         totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
         clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
         remainingDebt = totalDebt - clearedDebt;
@@ -194,15 +270,78 @@
                 .ToList();
 
             FilteredTransactions = Data.Transactions;
+            CalculateHighestTransactions();
+
             ApplyFilters();
         }
         else
         {
             AvailableTags = new List<string>();
+            CalculateHighestTransactions();
+
             FilteredTransactions = new List<Transactions>();
         }
     }
+    private async Task DownloadTransactionsAsExcel()
+    {
+        var base64Data = await GetExcelBase64DataAsync();
+        await JSRuntime.InvokeVoidAsync("saveAsFile", "Transaction_history.xlsx", base64Data);
+    }
 
+    private async Task<string> GetExcelBase64DataAsync()
+    {
+        var transactions = FilteredTransactions;
+        var package = new OfficeOpenXml.ExcelPackage();
+        var worksheet = package.Workbook.Worksheets.Add("Transactions");
+
+        worksheet.Cells[1, 1].Value = "Transaction ID";
+        worksheet.Cells[1, 2].Value = "Source/Purpose";
+        worksheet.Cells[1, 3].Value = "Credit";
+        worksheet.Cells[1, 4].Value = "Debit";
+        worksheet.Cells[1, 5].Value = "Date";
+        worksheet.Cells[1, 6].Value = "Tags";
+
+        int row = 2;
+        foreach (var transaction in transactions)
+        {
+            worksheet.Cells[row, 1].Value = "#TRNSC00-" + transaction.Id;
+            worksheet.Cells[row, 2].Value = transaction.Description;
+            worksheet.Cells[row, 3].Value = transaction.Credit;
+            worksheet.Cells[row, 4].Value = transaction.Debit;
+            worksheet.Cells[row, 5].Value = transaction.Date.ToString("MM/dd/yyyy");
+            worksheet.Cells[row, 6].Value = transaction.Tags;
+            row++;
+        }
+
+        var fileData = package.GetAsByteArray();
+        return Convert.ToBase64String(fileData);
+    }
+    private void CalculateHighestTransactions()
+    {
+        // Highest Inflow Transaction
+        HighestInflowTransaction = FilteredTransactions
+            .Where(t => t.Credit > 0 )
+            .OrderByDescending(t => t.Credit)
+            .FirstOrDefault();
+
+        // Lowest Inflow Transaction
+        LowestInflowTransaction = FilteredTransactions
+            .Where(t => t.Credit > 0)
+            .OrderBy(t => t.Credit)
+            .FirstOrDefault();
+
+        // Highest Outflow Transaction
+        HighestOutflowTransaction = FilteredTransactions
+            .Where(t => t.Debit > 0)
+            .OrderByDescending(t => t.Debit)
+            .FirstOrDefault();
+
+        // Lowest Outflow Transaction
+        LowestOutflowTransaction = FilteredTransactions
+            .Where(t => t.Debit > 0)
+            .OrderBy(t => t.Debit)
+            .FirstOrDefault();
+    }
     private void FilterByCategory(ChangeEventArgs e)
     {
         SelectedCategory = e.Value.ToString();

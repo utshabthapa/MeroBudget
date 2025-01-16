@@ -26,7 +26,14 @@
     </div>-->
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
-
+    <script>
+        function saveAsFile(fileName, base64Data) {
+            var link = document.createElement('a');
+            link.href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64Data;
+            link.download = fileName;
+            link.click();
+        }
+    </script>
 </body>
 
 </html>

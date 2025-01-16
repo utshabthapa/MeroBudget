@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.ComponentModel;
+using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 
 namespace MeroBudget
 {
@@ -20,7 +22,7 @@ namespace MeroBudget
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
-
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.Commercial;  // or LicenseContext.NonCommercial if you're using it for non-commercial purposes
             return builder.Build();
         }
     }

@@ -89,9 +89,9 @@
             {
                 <tr>
                         <td class="border px-4 py-2">#DBT00-@debt.Id</td>
-                    <td class="border border-gray-300 px-4 py-2">@debt.Amount</td>
-                    <td class="border border-gray-300 px-4 py-2">@debt.PaidAmount</td>
-                    <td class="border border-gray-300 px-4 py-2">@((debt.Amount - debt.PaidAmount).ToString("0.##"))</td>
+                        <td class="border border-gray-300 px-4 py-2">Rs.@debt.Amount</td>
+                        <td class="border border-gray-300 px-4 py-2">Rs.@debt.PaidAmount</td>
+                        <td class="border border-gray-300 px-4 py-2">Rs.@((debt.Amount - debt.PaidAmount).ToString("0.##"))</td>
                         <td class="border px-4 py-2">
                             @((debt.Amount - debt.PaidAmount) == 0 ? "Cleared" : "Pending")
                         </td>
@@ -120,7 +120,7 @@
                 <p class="mb-4">Status: <strong>@((SelectedDebt.Amount - SelectedDebt.PaidAmount) == 0 ? "Cleared":"Pending")</strong></p>
             <p class="mb-4">Due Date: <strong>@SelectedDebt.DueDate</strong></p>
 
-                <p class="mb-4">Remaining Amount: <strong>@((SelectedDebt.Amount - SelectedDebt.PaidAmount).ToString("0.##"))</strong></p>
+            <p class="mb-4">Remaining Amount: <strong>Rs.@((SelectedDebt.Amount - SelectedDebt.PaidAmount).ToString("0.##"))</strong></p>
 
                 @if (!string.IsNullOrEmpty(ErrorMessage))
                 {
