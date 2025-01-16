@@ -65,6 +65,43 @@
             <p class="text-blue-900 font-bold text-2xl">Rs.@Data.Debt.Sum(d => d.Amount - d.PaidAmount)</p>
         </div>
     </div>
+    <div class="flex gap-6 mb-6">
+
+        <!-- Highest Inflow -->
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 flex-1">
+            <h2 class="text-red-700 font-medium text-lg">Highest Debt</h2>
+            <p class="text-red-900 font-bold text-2xl">
+                @(HighestDebt != null ? "Rs." : "Rs.")
+                @if (HighestDebt != null)
+                {
+                    @HighestDebt.Amount.ToString("")
+                }
+                else
+                {
+                <p>N / A</p>
+                }
+            </p>
+        </div>
+
+        <!-- Lowest Debt -->
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 flex-1">
+            <h2 class="text-red-700 font-medium text-lg">Lowest Debt</h2>
+            <p class="text-red-900 font-bold text-2xl">
+                @(LowestDebt != null ? "Rs." : "Rs.")
+
+                @if (LowestDebt != null)
+                {
+                    @LowestDebt.Amount.ToString("")
+                }
+                else
+                {
+                <p>N / A</p>
+                }
+            </p>
+        </div>
+
+
+    </div>
     <div class="flex justify-end gap-4 mb-4">
         <button @onclick="SortByLatest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Latest</button>
         <button @onclick="SortByOldest" class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300">Sort by Oldest</button>
@@ -151,6 +188,9 @@
     private string SelectedTag = "All";
     private DateTime? StartDate;
     private DateTime? EndDate;
+    private Debt HighestDebt;
+    private Debt LowestDebt;
+
 
     private IEnumerable<Debt> FilteredDebts;
     private IEnumerable<string> UniqueTags;
@@ -168,16 +208,35 @@
                 .ToList();
 
             FilteredDebts = Data.Debt;
+            CalculateHighestDebts();
+
             ApplyFilters();
 
         }
         else
         {
             UniqueTags = new List<string>();
+            CalculateHighestDebts();
+
             FilteredDebts = new List<Debt>();
         }
     }
+    private void CalculateHighestDebts()
+    {
+        // Highest Inflow Transaction
+        HighestDebt = FilteredDebts
+            .Where(d => d.Amount > 0)
+            .OrderByDescending(d => d.Amount)
+            .FirstOrDefault();
 
+        // Lowest Inflow Transaction
+        LowestDebt = FilteredDebts
+            .Where(d => d.Amount > 0)
+            .OrderBy(d => d.Amount)
+            .FirstOrDefault();
+
+        
+    }
     private void OpenModal(Debt debt)
     {
         SelectedDebt = debt;

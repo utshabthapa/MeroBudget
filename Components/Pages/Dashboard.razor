@@ -6,15 +6,15 @@
     <!-- Greeting Section -->
     <div class="flex justify-between items-center my-6">
 
-    <h1 class="text-4xl font-semibold ">Hello, Utshab!</h1>
+    <h1 class="text-4xl font-semibold ">Hello, @UserService.CurrentUser.Username!</h1>
 
     <!-- Date Filter Section -->
     <div class=" flex items-center gap-6">
-        <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            <button class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300"
                 @onclick="() => ApplyDateFilter(DateFilter.LastMonth)">
             Last Month
         </button>
-        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+            <button class="bg-gray-200 text-black text-sm tracking-wide px-4 py-2 rounded-lg hover:bg-gray-300"
                 @onclick="() => ApplyDateFilter(DateFilter.LastThreeMonths)">
             Last 3 Months
         </button>
@@ -178,13 +178,15 @@
         var transactions = Data.Transactions;
         var debts = Data.Debt;
 
-        filteredCashInflow = transactions.Sum(t => t.Credit);
-        filteredCashOutflow = transactions.Sum(t => t.Debit);
-        filteredBalance = filteredCashInflow - filteredCashOutflow;
-
         filteredTotalDebt = debts.Sum(d => d.Amount);
         filteredClearedDebt = debts.Sum(d => d.PaidAmount);
         filteredRemainingDebt = filteredTotalDebt - filteredClearedDebt;
+
+
+        filteredCashInflow = transactions.Sum(t => t.Credit) + filteredRemainingDebt - filteredClearedDebt;
+        filteredCashOutflow = transactions.Sum(t => t.Debit);
+        filteredBalance = filteredCashInflow - filteredCashOutflow;
+
 
         filteredPendingDebts = debts
             .Where(d => d.Amount > d.PaidAmount)
@@ -239,7 +241,7 @@
 
         filteredCashInflow = transactions
             .Where(t => t.Date >= startDate && t.Date <= endDate)
-            .Sum(t => t.Credit);
+            .Sum(t => t.Credit) + filteredRemainingDebt - filteredClearedDebt;
 
         filteredCashOutflow = transactions
             .Where(t => t.Date >= startDate && t.Date <= endDate)
