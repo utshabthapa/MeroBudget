@@ -20,7 +20,7 @@ namespace MeroBudget.Models
 
         public DateTime Date { get; set; }
 
-        [Required(ErrorMessage = "Source is required")]
+        [Required(ErrorMessage = "Source/purpose is required")]
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Tags are required")]
