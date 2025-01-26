@@ -178,14 +178,6 @@
         var transactions = Data.Transactions;
         var debts = Data.Debt;
 
-        filteredTotalDebt = debts.Sum(d => d.Amount);
-        filteredClearedDebt = debts.Sum(d => d.PaidAmount);
-        filteredRemainingDebt = filteredTotalDebt - filteredClearedDebt;
-
-
-        filteredCashInflow = transactions.Sum(t => t.Credit) + filteredRemainingDebt - filteredClearedDebt;
-        filteredCashOutflow = transactions.Sum(t => t.Debit);
-        filteredBalance = filteredCashInflow - filteredCashOutflow;
 
 
         filteredPendingDebts = debts
@@ -239,15 +231,7 @@
         var transactions = Data.Transactions;
         var debts = Data.Debt;
 
-        filteredCashInflow = transactions
-            .Where(t => t.Date >= startDate && t.Date <= endDate)
-            .Sum(t => t.Credit) + filteredRemainingDebt - filteredClearedDebt;
-
-        filteredCashOutflow = transactions
-            .Where(t => t.Date >= startDate && t.Date <= endDate)
-            .Sum(t => t.Debit);
-
-        filteredBalance = filteredCashInflow - filteredCashOutflow;
+        
 
         filteredTotalDebt = debts
             .Where(d => d.Date >= startDate && d.Date <= endDate)
@@ -264,6 +248,15 @@
            .Select(d => new Debt { Id = d.Id, Amount = d.Amount - d.PaidAmount, Tag = d.Tag })
            .ToList();
 
+        filteredCashInflow = transactions
+         .Where(t => t.Date >= startDate && t.Date <= endDate)
+         .Sum(t => t.Credit) + filteredRemainingDebt - filteredClearedDebt;
+
+        filteredCashOutflow = transactions
+            .Where(t => t.Date >= startDate && t.Date <= endDate)
+            .Sum(t => t.Debit);
+
+        filteredBalance = filteredCashInflow - filteredCashOutflow;
         filteredTopTransactions = transactions
          .Select(t => new Transaction
              {

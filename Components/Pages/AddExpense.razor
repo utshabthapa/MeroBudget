@@ -52,19 +52,40 @@
 
 @code {
     private AppData Data;
+    private decimal cashInflow;
+    private decimal cashOutflow;
+    private decimal totalDebt;
+    private decimal clearedDebt;
+    private decimal remainingDebt;
+    private decimal MainBalance;
+
     private Transactions newExpense = new Transactions();
     private string ErrorMessage;
 
     protected override void OnInitialized()
     {
         Data = UserService.LoadData();
+        
     }
 
     private void HandleExpenseSubmit()
     {
-        decimal availableBalance = Data.Transactions.Sum(t => t.Credit - t.Debit);
+       
+        Data = UserService.LoadData();
+        var transactions = Data.Transactions;
 
-        if (newExpense.Debit > availableBalance)
+        // Fetching all transactions from AppData
+        var debts = Data.Debt;
+        totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
+        clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
+        remainingDebt = totalDebt - clearedDebt;
+
+        cashInflow = transactions.Sum(t => t.Credit) + remainingDebt - clearedDebt;
+        cashOutflow = transactions.Sum(t => t.Debit);
+
+        MainBalance = cashInflow - cashOutflow;
+
+        if (newExpense.Debit > MainBalance)
         {
             ErrorMessage = "Insufficient balance to add this expense.";
             return;

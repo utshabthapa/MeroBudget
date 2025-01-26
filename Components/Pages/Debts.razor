@@ -179,6 +179,11 @@
 
 @code {
     private AppData Data;
+    private decimal cashInflow;
+    private decimal cashOutflow;
+    private decimal totalDebt;
+    private decimal clearedDebt;
+    private decimal remainingDebt;
     private bool ShowModal = false;
     private Debt SelectedDebt;
     private decimal PaidAmount;
@@ -190,6 +195,8 @@
     private DateTime? EndDate;
     private Debt HighestDebt;
     private Debt LowestDebt;
+    private decimal MainBalance;
+
 
 
     private IEnumerable<Debt> FilteredDebts;
@@ -256,9 +263,30 @@
 
         decimal remainingAmount = SelectedDebt.Amount - SelectedDebt.PaidAmount;
 
+        Data = UserService.LoadData();
+        var transactions = Data.Transactions;
+
+        // Fetching all transactions from AppData
+        var debts = Data.Debt;
+
+
+        totalDebt = debts.Sum(d => d.Amount);       // Total amount of all debts
+        clearedDebt = debts.Sum(d => d.PaidAmount); // Total paid amount
+        remainingDebt = totalDebt - clearedDebt;
+
+        cashInflow = transactions.Sum(t => t.Credit) + remainingDebt - clearedDebt;
+        cashOutflow = transactions.Sum(t => t.Debit);
+
+        MainBalance = cashInflow - cashOutflow;
+
         if (PaidAmount > remainingAmount)
         {
             ErrorMessage = "Paid amount cannot exceed the remaining debt.";
+            return;
+        }
+        if (PaidAmount > MainBalance)
+        {
+            ErrorMessage = "Insufficient balance to pay this debt.";
             return;
         }
 
